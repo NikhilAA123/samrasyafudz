@@ -1,0 +1,5 @@
+spring.datasource.url=jdbc:postgresql://localhost:5432/productdb
+spring.datasource.username=postgres
+spring.datasource.password=your_local_postgres_password
+jwt.secret=replace-with-a-random-32-plus-character-secret-string
+server.port=8082

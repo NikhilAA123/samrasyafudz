@@ -22,7 +22,6 @@ cd samrasyafudz
 psql -U postgres -c "CREATE DATABASE usersdb;"
 psql -U postgres -c "CREATE DATABASE productdb;"
 psql -U postgres -c "CREATE DATABASE ordersdb;"
-psql -U postgres -c "CREATE DATABASE paymentsdb;"
 ```
 
 ### 3. Configure each service
@@ -39,17 +38,14 @@ cp product-service/src/main/resources/application-local.properties.example \
 cp order-service/src/main/resources/application-local.properties.example \
    order-service/src/main/resources/application-local.properties
 
-cp payment-service/src/main/resources/application-local.properties.example \
-   payment-service/src/main/resources/application-local.properties
-
 cp api-gateway/src/main/resources/application-local.properties.example \
    api-gateway/src/main/resources/application-local.properties
 
-cp dryfruits-frontend/.env.example dryfruits-frontend/.env.development
+cp samrasyafudz-frontend/.env.example dryfruits-frontend/.env.development
 ```
 
 **Important:** the `jwt.secret` value must be **identical, character-for-character**, across
-`user-service`, `product-service`, `order-service`, and `payment-service`. A mismatch here is
+`user-service`, `product-service`, `order-service`. A mismatch here is
 the single most common setup mistake — it causes JWT signature validation to silently fail,
 which shows up as a confusing `403 Forbidden` rather than a clear error (see "Troubleshooting"
 below).
@@ -70,10 +66,7 @@ services and can start in any order; `order-service` calls `product-service`;
 # Terminal 3 — order-service (port 8083)
 ./gradlew :order-service:bootRun --args='--spring.profiles.active=local'
 
-# Terminal 4 — payment-service (port 8084)
-./gradlew :payment-service:bootRun --args='--spring.profiles.active=local'
-
-# Terminal 5 — api-gateway (port 8080)
+# Terminal 4 — api-gateway (port 8080)
 ./gradlew :api-gateway:bootRun --args='--spring.profiles.active=local'
 ```
 
