@@ -136,41 +136,6 @@ curl http://localhost:8080/api/categories
 Full setup details and a troubleshooting table for common first-run issues are in
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
----
-
-## Features
-
-- 📱 Mobile OTP login (no passwords)
-- 🛍️ Product catalog with weight-based variants (200g/400g/500g pricing)
-- 📍 Address entry with Google Places Autocomplete
-- 🛒 Persistent server-side cart
-- 📦 Order lifecycle (Pending → Confirmed → Shipped → Delivered, with cancellation)
-- 💳 UPI payments via Razorpay, with webhook-based confirmation
-- 🔐 Role-based access (Customer / Admin)
-
----
-
-## Known Limitations / Roadmap
-
-- **Stock deduction is not concurrency-safe.** `ProductVariantService.deductStock`
-  is a plain read-then-write; under simultaneous last-unit purchases, overselling is
-  possible. See the code comment for the two suggested fixes (pessimistic lock or
-  atomic conditional update).
-- **No automated tests yet.** Unit tests for services and integration tests for the
-  checkout flow would both be valuable contributions.
-- **SMS is mocked.** `user-service` currently logs OTPs to the console instead of
-  sending real SMS — see `LoggingSmsSender`. Wiring up a real provider (MSG91,
-  Twilio) is documented as a drop-in replacement via the `SmsSender` interface.
-- **Orders show a bare address ID**, not the formatted address — `payment-service`
-  already has the client code to fetch it; `order-service`'s response just needs
-  to include it.
-- **No CI pipeline** yet.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md#areas-that-need-help) for the full list of
-good first contributions.
-
----
-
 ## Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for setup
