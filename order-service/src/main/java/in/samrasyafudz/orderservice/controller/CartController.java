@@ -1,0 +1,45 @@
+package in.samrasyafudz.orderservice.controller;
+
+import in.samrasyafudz.orderservice.dto.AddToCartRequest;
+import in.samrasyafudz.orderservice.dto.CartResponse;
+import in.samrasyafudz.orderservice.dto.UpdateCartItemRequest;
+import in.samrasyafudz.orderservice.security.AuthenticatedUser;
+import in.samrasyafudz.orderservice.service.CartService;
+import jakarta.validation.Valid;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/cart")
+public class CartController {
+
+    private final CartService cartService;
+
+    public CartController(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    @GetMapping
+    public CartResponse getCart(@AuthenticationPrincipal AuthenticatedUser user) {
+        return cartService.getCart(user.userId());
+    }
+
+    @PostMapping
+    public CartResponse addToCart(@AuthenticationPrincipal AuthenticatedUser user,
+                                  @Valid @RequestBody AddToCartRequest request) {
+        return cartService.addToCart(user.userId(), request);
+    }
+
+    @PutMapping("/{cartItemId}")
+    public CartResponse updateQuantity(@AuthenticationPrincipal AuthenticatedUser user,
+                                       @PathVariable Long cartItemId,
+                                       @Valid @RequestBody UpdateCartItemRequest request) {
+        return cartService.updateQuantity(user.userId(), cartItemId, request.getQuantity());
+    }
+
+    @DeleteMapping("/{cartItemId}")
+    public CartResponse removeItem(@AuthenticationPrincipal AuthenticatedUser user,
+                                   @PathVariable Long cartItemId) {
+        return cartService.removeItem(user.userId(), cartItemId);
+    }
+}

@@ -1,0 +1,49 @@
+.order-detail-page { padding: 32px 24px 80px; max-width: 640px; }
+
+.order-detail-page h1 { font-size: 26px; margin: 16px 0 12px; }
+
+.order-status-badge {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 24px;
+}
+
+.order-status-pending { background: #F5E6C8; color: #8A6D1F; }
+.order-status-confirmed { background: #DCE8D0; color: var(--color-olive); }
+.order-status-shipped { background: #D8E4F0; color: #2E5A8A; }
+.order-status-delivered { background: #D4EAD8; color: #2C7A3F; }
+.order-status-cancelled { background: #F0D8D5; color: var(--color-brick); }
+
+.order-detail-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 16px;
+}
+
+.order-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--color-ink-soft);
+}
+
+.order-detail-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.order-detail-date {
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  margin-bottom: 24px;
+}

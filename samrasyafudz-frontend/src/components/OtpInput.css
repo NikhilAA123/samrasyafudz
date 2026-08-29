@@ -1,0 +1,25 @@
+.otp-input-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 8px 0 4px;
+}
+
+.otp-box {
+  width: 44px;
+  height: 52px;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 500;
+  border: 1.5px dashed var(--color-accent);
+  border-radius: 8px;
+  background: var(--color-bg);
+  color: var(--color-ink);
+}
+
+.otp-box:focus {
+  border-style: solid;
+  border-color: var(--color-accent-dark);
+  background: var(--color-surface);
+}

@@ -1,0 +1,57 @@
+.login-modal-step h2 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.login-modal-subtitle {
+  color: var(--color-ink-soft);
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.login-modal-phone-field {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.login-modal-phone-field:focus-within {
+  border-color: var(--color-accent-dark);
+}
+
+.login-modal-prefix {
+  padding: 11px 12px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--color-ink-soft);
+  border-right: 1px solid var(--color-border);
+}
+
+.login-modal-phone-field input {
+  border: none;
+  flex: 1;
+}
+.login-modal-phone-field input:focus { outline: none; }
+
+.login-modal-link {
+  background: none;
+  color: var(--color-accent-dark);
+  font-weight: 600;
+  font-size: inherit;
+  padding: 0;
+}
+.login-modal-link:hover { text-decoration: underline; }
+
+.login-modal-resend {
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  margin-top: 18px;
+}
+
+.auth-submit { margin-top: 12px; }

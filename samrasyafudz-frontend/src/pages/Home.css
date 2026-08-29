@@ -1,0 +1,33 @@
+.home-page { padding: 40px 24px 80px; }
+
+.home-hero {
+  max-width: 600px;
+  margin-bottom: 40px;
+}
+
+.home-hero h1 {
+  font-size: 38px;
+  line-height: 1.15;
+  margin-bottom: 12px;
+}
+
+.home-hero p {
+  color: var(--color-ink-soft);
+  font-size: 16px;
+  margin: 0;
+}
+
+.home-status {
+  color: var(--color-ink-soft);
+  padding: 40px 0;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .home-hero h1 { font-size: 28px; }
+}
