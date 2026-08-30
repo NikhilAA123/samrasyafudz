@@ -3,4 +3,5 @@ spring.datasource.username=postgres
 spring.datasource.password=your_local_postgres_password
 jwt.secret=replace-with-a-random-32-plus-character-secret-string
 product-service.url=http://localhost:8082
+user-service.url=http://localhost:8081
 server.port=8083
