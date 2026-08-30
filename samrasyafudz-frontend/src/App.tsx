@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/Navbar";
+import LoginModal from "./components/LoginModal";
 import Home from "./pages/Home";
 import ProductDetail from "./pages/ProductDetail";
 import Login from "./pages/Login";
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="/orders" element={<OrdersList />} />
             <Route path="/orders/:id" element={<OrderDetail />} />
           </Routes>
+          <LoginModal />
         </BrowserRouter>
       </CartProvider>
     </AuthProvider>

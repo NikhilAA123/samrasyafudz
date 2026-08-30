@@ -1,18 +1,52 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Product, ProductVariant } from "../api/types";
+import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import "./ProductCard.css";
 
 export default function ProductCard({ product }: { product: Product }) {
   const hasVariants = product.variants && product.variants.length > 0;
+  const { addItem } = useCart();
+  const { user, openLogin } = useAuth();
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     hasVariants ? product.variants?.[0] ?? null : null
   );
+  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function handleVariantChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const variant = product.variants?.find((v) => v.id === Number(e.target.value)) ?? null;
     setSelectedVariant(variant);
+    setAdded(false);
+    setError(null);
+  }
+
+  const outOfStock = selectedVariant ? selectedVariant.stockQuantity <= 0 : true;
+
+  async function handleAddToCart(e: React.MouseEvent<HTMLButtonElement>) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      openLogin();
+      return;
+    }
+    if (!selectedVariant) return;
+
+    setAdding(true);
+    setError(null);
+    setAdded(false);
+    try {
+      await addItem(product.id, selectedVariant.id, 1);
+      setAdded(true);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Could not add to cart.");
+    } finally {
+      setAdding(false);
+    }
   }
 
   return (
@@ -34,7 +68,6 @@ export default function ProductCard({ product }: { product: Product }) {
           </span>
         )}
 
-
         {hasVariants && (
           <select
             className="product-card-variant-select"
@@ -50,6 +83,15 @@ export default function ProductCard({ product }: { product: Product }) {
           </select>
         )}
 
+        {error && <p className="product-card-error">{error}</p>}
+
+        <button
+          className="product-card-add"
+          disabled={outOfStock || !hasVariants || adding}
+          onClick={handleAddToCart}
+        >
+          {outOfStock ? "Sold out" : added ? "Added ✓" : adding ? "Adding…" : "Add to cart"}
+        </button>
       </div>
     </Link>
   );
