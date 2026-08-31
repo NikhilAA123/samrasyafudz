@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { fetchProductById } from "../api/catalog";
 import type { Product, ProductVariant } from "../api/types";
 import { useCart } from "../context/CartContext";
@@ -8,7 +8,6 @@ import "./ProductDetail.css";
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   const [loading, setLoading] = useState(true);
@@ -17,7 +16,7 @@ export default function ProductDetail() {
   const [addedMessage, setAddedMessage] = useState<string | null>(null);
 
   const { addItem } = useCart();
-  const { user } = useAuth();
+  const { user, openLogin } = useAuth();
 
   useEffect(() => {
     if (!id) return;
@@ -56,7 +55,7 @@ export default function ProductDetail() {
 
   async function handleAddToCart() {
     if (!user) {
-      navigate("/login");
+      openLogin();
       return;
     }
     if (!selectedVariant) return;

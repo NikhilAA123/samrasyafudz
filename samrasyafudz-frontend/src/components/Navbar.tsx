@@ -1,15 +1,13 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
-import LoginModal from "./LoginModal";
 import "./Navbar.css";
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, openLogin } = useAuth();
   const { itemCount, refreshCart } = useCart();
   const navigate = useNavigate();
-  const [loginOpen, setLoginOpen] = useState(false);
 
   useEffect(() => {
     refreshCart();
@@ -43,7 +41,7 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <button className="navbar-link navbar-link-btn" onClick={() => setLoginOpen(true)}>
+              <button className="navbar-link navbar-link-btn" onClick={openLogin}>
                 Log in
               </button>
               <Link to="/register" className="btn-primary navbar-cta">Create account</Link>
@@ -51,8 +49,6 @@ export default function Navbar() {
           )}
         </nav>
       </div>
-
-      <LoginModal isOpen={loginOpen} onClose={() => setLoginOpen(false)} />
     </header>
   );
 }

@@ -12,17 +12,29 @@ interface AuthContextValue {
   login: (token: string, user: AuthUser) => void;
   logout: () => void;
   updateUser: (updates: Partial<AuthUser>) => void;
+  loginOpen: boolean;
+  openLogin: () => void;
+  closeLogin: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [loginOpen, setLoginOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) setUser(JSON.parse(stored));
   }, []);
+
+  function openLogin() {
+    setLoginOpen(true);
+  }
+
+  function closeLogin() {
+    setLoginOpen(false);
+  }
 
   function login(token: string, user: AuthUser) {
     localStorage.setItem("token", token);
@@ -47,7 +59,7 @@ function updateUser(updates: Partial<AuthUser>) {
   
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loginOpen, openLogin, closeLogin }}>
       {children}
     </AuthContext.Provider>
   );
