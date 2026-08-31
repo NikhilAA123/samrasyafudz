@@ -101,3 +101,33 @@
   color: var(--color-ink);
   font-family: var(--font-body);
 }
+
+.product-card-error {
+  color: var(--color-brick, #a33);
+  font-size: 12px;
+  margin: 8px 0 0;
+}
+
+.product-card-add {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  background: var(--color-olive);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.product-card-add:hover:not(:disabled) {
+  background: var(--color-olive-dark, #556b2f);
+}
+
+.product-card-add:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

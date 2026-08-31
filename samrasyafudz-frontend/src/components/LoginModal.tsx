@@ -5,16 +5,11 @@ import { sendOtp, verifyOtp } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import "./LoginModal.css";
 
-interface Props {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
 type Step = "phone" | "otp";
 
 const RESEND_COOLDOWN_SECONDS = 30;
 
-export default function LoginModal({ isOpen, onClose }: Props) {
+export default function LoginModal() {
   const [step, setStep] = useState<Step>("phone");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -22,11 +17,11 @@ export default function LoginModal({ isOpen, onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
-  const { login } = useAuth();
+  const { login, loginOpen, closeLogin } = useAuth();
 
   // Reset all state whenever the modal is closed, so reopening starts fresh
   useEffect(() => {
-    if (!isOpen) {
+    if (!loginOpen) {
       setStep("phone");
       setPhone("");
       setOtp("");
@@ -34,7 +29,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
       setSubmitting(false);
       setCooldown(0);
     }
-  }, [isOpen]);
+  }, [loginOpen]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -93,7 +88,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
         userId: res.userId, phone: res.phone, fullName: res.fullName,
         email: ""
       });
-      onClose();
+      closeLogin();
     } catch (err: any) {
       setError(err?.response?.data?.message || "Incorrect or expired code. Please try again.");
     } finally {
@@ -103,7 +98,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={loginOpen} onClose={closeLogin}>
       {step === "phone" ? (
         <div className="login-modal-step">
           <h2>Log in</h2>
