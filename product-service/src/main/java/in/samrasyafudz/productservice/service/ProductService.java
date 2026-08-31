@@ -58,4 +58,13 @@ public class ProductService {
                 variants
         );
     }
+
+    public void updateImageUrl(Long productId, String imageUrl) {
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(productId));
+
+        product.setImageUrl(imageUrl);
+        productRepository.save(product);
+    }
 }

@@ -6,7 +6,6 @@ import in.samrasyafudz.productservice.model.Category;
 import in.samrasyafudz.productservice.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,7 +29,16 @@ public class CategoryService {
 
     public List<CategoryResponse> findAll() {
         return categoryRepository.findAll().stream()
-            .map(cat -> new CategoryResponse(cat.getId(), cat.getName()))
-            .collect(java.util.stream.Collectors.toList());
+                .map(cat -> new CategoryResponse(cat.getId(), cat.getName()))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public void updateImageUrl(Long categoryId, String imageUrl) {
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+
+        category.setImageUrl(imageUrl);
+        categoryRepository.save(category);
     }
 }

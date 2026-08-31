@@ -5,4 +5,5 @@ dependencies {
     implementation("org.flywaydb:flyway-core:9.22.3")
     testImplementation("org.springframework.security:spring-security-test")
     implementation("com.google.cloud.sql:postgres-socket-factory:1.19.1")
+    implementation("com.google.cloud:google-cloud-storage:2.40.1")
 }
