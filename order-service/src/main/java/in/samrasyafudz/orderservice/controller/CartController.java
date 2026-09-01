@@ -30,16 +30,16 @@ public class CartController {
         return cartService.addToCart(user.userId(), request);
     }
 
-    @PutMapping("/{cartItemId}")
+    @PutMapping("/product/{productId}/variant/{variantId}")
     public CartResponse updateQuantity(@AuthenticationPrincipal AuthenticatedUser user,
-                                       @PathVariable Long cartItemId,
+                                       @PathVariable Long productId, @PathVariable Long variantId,
                                        @Valid @RequestBody UpdateCartItemRequest request) {
-        return cartService.updateQuantity(user.userId(), cartItemId, request.getQuantity());
+        return cartService.updateQuantity(user.userId(), productId, variantId, request.getQuantity());
     }
 
-    @DeleteMapping("/{cartItemId}")
+    @DeleteMapping("/product/{productId}/variant/{variantId}")
     public CartResponse removeItem(@AuthenticationPrincipal AuthenticatedUser user,
-                                   @PathVariable Long cartItemId) {
-        return cartService.removeItem(user.userId(), cartItemId);
+                                   @PathVariable Long productId, @PathVariable Long variantId) {
+        return cartService.removeItem(user.userId(), productId, variantId);
     }
 }

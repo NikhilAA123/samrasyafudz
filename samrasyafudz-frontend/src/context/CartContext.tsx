@@ -9,8 +9,8 @@ interface CartContextValue {
   loading: boolean;
   refreshCart: () => Promise<void>;
   addItem: (productId: number, variantId: number, quantity: number) => Promise<void>;
-  updateQuantity: (cartItemId: number, quantity: number) => Promise<void>;
-  removeItem: (cartItemId: number) => Promise<void>;
+  updateQuantity: (productId: number, variantId: number, quantity: number) => Promise<void>;
+  removeItem: (productId: number, variantId:number) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | undefined>(undefined);
@@ -39,13 +39,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart(updated);
   }
 
-  async function updateQuantity(cartItemId: number, quantity: number) {
-    const updated = await updateCartItemQuantity(cartItemId, quantity);
+  async function updateQuantity(productId: number, variantId: number , quantity: number) {
+    const updated = await updateCartItemQuantity(productId , variantId, quantity);
     setCart(updated);
   }
 
-  async function removeItem(cartItemId: number) {
-    const updated = await removeCartItem(cartItemId);
+  async function removeItem(productId: number , variantId: number) {
+    const updated = await removeCartItem(productId, variantId);
     setCart(updated);
   }
 

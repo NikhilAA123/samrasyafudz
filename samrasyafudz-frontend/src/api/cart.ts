@@ -11,12 +11,12 @@ export async function addToCart(payload: AddToCartPayload): Promise<Cart> {
   return data;
 }
 
-export async function updateCartItemQuantity(cartItemId: number, quantity: number): Promise<Cart> {
-  const { data } = await api.put<Cart>(`/api/cart/${cartItemId}`, { quantity });
+export async function updateCartItemQuantity(productId: number, variantId: number, quantity: number): Promise<Cart> {
+  const { data } = await api.put<Cart>(`/api/cart/product/${productId}/variant/${variantId}`, { quantity });
   return data;
 }
 
-export async function removeCartItem(cartItemId: number): Promise<Cart> {
-  const { data } = await api.delete<Cart>(`/api/cart/${cartItemId}`);
+export async function removeCartItem(productId: number,variantId: number): Promise<Cart> {
+  const { data } = await api.delete<Cart>(`/api/cart/product/${productId}/variant/${variantId}`);
   return data;
 }

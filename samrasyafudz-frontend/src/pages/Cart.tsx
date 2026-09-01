@@ -12,20 +12,20 @@ export default function CartPage() {
     refreshCart();
   }, [refreshCart]);
 
-  async function handleQuantityChange(cartItemId: number, quantity: number) {
+  async function handleQuantityChange( productId:number, variantId:number , quantity: number) {
     if (quantity < 1) return;
     setError(null);
     try {
-      await updateQuantity(cartItemId, quantity);
+      await updateQuantity(productId,variantId, quantity);
     } catch (err: any) {
       setError(err?.response?.data?.message || "Could not update quantity.");
     }
   }
 
-  async function handleRemove(cartItemId: number) {
+  async function handleRemove(productId:number, variantId:number ,) {
     setError(null);
     try {
-      await removeItem(cartItemId);
+      await removeItem(productId,variantId);
     } catch {
       setError("Could not remove item.");
     }
@@ -63,7 +63,7 @@ export default function CartPage() {
             <div className="cart-item-quantity">
               <button
                 className="cart-qty-btn"
-                onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                onClick={() => handleQuantityChange(item.productId, item.variantId, item.quantity - 1)}
                 disabled={item.quantity <= 1}
               >
                 −
@@ -71,7 +71,7 @@ export default function CartPage() {
               <span>{item.quantity}</span>
               <button
                 className="cart-qty-btn"
-                onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                onClick={() => handleQuantityChange(item.productId, item.variantId, item.quantity + 1)}
               >
                 +
               </button>
@@ -79,7 +79,7 @@ export default function CartPage() {
 
             <div className="cart-item-subtotal">₹{item.subtotal.toFixed(0)}</div>
 
-            <button className="cart-item-remove" onClick={() => handleRemove(item.id)}>
+            <button className="cart-item-remove" onClick={() => handleRemove(item.productId,item.variantId)}>
               Remove
             </button>
           </div>

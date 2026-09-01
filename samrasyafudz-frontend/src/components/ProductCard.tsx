@@ -7,7 +7,7 @@ import "./ProductCard.css";
 
 export default function ProductCard({ product }: { product: Product }) {
   const hasVariants = product.variants && product.variants.length > 0;
-  const { addItem } = useCart();
+  const { cart , addItem , updateQuantity } = useCart();
   const { user, openLogin } = useAuth();
 
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
@@ -16,6 +16,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState<number>(0);
 
   function handleVariantChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const variant = product.variants?.find((v) => v.id === Number(e.target.value)) ?? null;
@@ -41,6 +42,7 @@ export default function ProductCard({ product }: { product: Product }) {
     setAdded(false);
     try {
       await addItem(product.id, selectedVariant.id, 1);
+      setQuantity(1);
       setAdded(true);
     } catch (err: any) {
       setError(err?.response?.data?.message || "Could not add to cart.");
@@ -48,6 +50,18 @@ export default function ProductCard({ product }: { product: Product }) {
       setAdding(false);
     }
   }
+
+    async function handleQuantityChange(productId: number, variantId:number ,quantity: number) {
+    if (quantity < 1) return;
+    setError(null);
+    try {
+      await updateQuantity(productId,variantId, quantity);
+      setQuantity(prev => prev + 1)
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Could not update quantity.");
+    }
+  }
+
 
   return (
     <Link to={`/products/${product.id}`} className="product-card">
@@ -85,13 +99,36 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {error && <p className="product-card-error">{error}</p>}
 
-        <button
+        { quantity == 0 ? 
+
+                <button
           className="product-card-add"
           disabled={outOfStock || !hasVariants || adding}
           onClick={handleAddToCart}
         >
-          {outOfStock ? "Sold out" : added ? "Added ✓" : adding ? "Adding…" : "Add to cart"}
+          {outOfStock ? "Sold out" : added ? "Added" : adding ? "Adding…" : "Add to cart"}
         </button>
+        :
+
+        <div className="product-item-quantity">
+              <button
+                className="product-qty-btn"
+                onClick={() => handleQuantityChange(product.id,selectedVariant?.id || 0, quantity - 1)}
+                disabled={quantity <= 1}
+              >
+                −
+              </button>
+              <span>{quantity}</span>
+              <button
+                className="product-qty-btn"
+                onClick={() => handleQuantityChange(product.id,selectedVariant?.id || 0, quantity + 1)}
+              >
+                +
+              </button>
+        </div>
+}
+
+
       </div>
     </Link>
   );

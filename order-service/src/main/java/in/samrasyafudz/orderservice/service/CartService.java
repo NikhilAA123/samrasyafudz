@@ -6,11 +6,12 @@ import in.samrasyafudz.orderservice.dto.AddToCartRequest;
 import in.samrasyafudz.orderservice.dto.CartItemResponse;
 import in.samrasyafudz.orderservice.dto.CartResponse;
 import in.samrasyafudz.orderservice.entity.CartItem;
-import in.samrasyafudz.orderservice.exception.CartItemNotFoundException;
 import in.samrasyafudz.orderservice.exception.InsufficientStockException;
 import in.samrasyafudz.orderservice.repository.CartItemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class CartService {
@@ -61,19 +62,29 @@ public class CartService {
     }
 
     @Transactional
-    public CartResponse updateQuantity(Long userId, Long cartItemId, Integer quantity) {
-        CartItem item = cartItemRepository.findByIdAndUserId(cartItemId, userId)
-                .orElseThrow(CartItemNotFoundException::new);
-        item.setQuantity(quantity);
-        cartItemRepository.save(item);
+    public CartResponse updateQuantity(Long userId, Long productId, Long variantId, Integer quantity) {
+        List<CartItem> items = cartItemRepository.findByUserId(userId);
+        if (items != null) {
+            for (CartItem item : items) {
+                if (item.getProductId().equals(productId) && item.getVariantId().equals(variantId)) {
+                    item.setQuantity(quantity);
+                    cartItemRepository.save(item);
+                }
+            }
+        }
         return getCart(userId);
     }
 
     @Transactional
-    public CartResponse removeItem(Long userId, Long cartItemId) {
-        CartItem item = cartItemRepository.findByIdAndUserId(cartItemId, userId)
-                .orElseThrow(CartItemNotFoundException::new);
-        cartItemRepository.delete(item);
+    public CartResponse removeItem(Long userId, Long productId, Long variantId) {
+        List<CartItem> items = cartItemRepository.findByUserId(userId);
+        if (items != null) {
+            for (CartItem item : items) {
+                if (item.getProductId().equals(productId) && item.getVariantId().equals(variantId)) {
+                    cartItemRepository.delete(item);
+                }
+            }
+        }
         return getCart(userId);
     }
 
