@@ -2,17 +2,17 @@ package in.samrasyafudz.userservice.dto;
 
 public class AddressResponse {
 
-    private Long id;
-    private String label;
-    private String addressLine1;
-    private String addressLine2;
-    private String area;
-    private String city;
-    private String state;
-    private String pincode;
-    private Double latitude;
-    private Double longitude;
-    private Boolean isDefault;
+    private final Long id;
+    private final String label;
+    private final String addressLine1;
+    private final String addressLine2;
+    private final String area;
+    private final String city;
+    private final String state;
+    private final String pincode;
+    private final Double latitude;
+    private final Double longitude;
+    private final Boolean isDefault;
 
     public AddressResponse(Long id, String label, String addressLine1, String addressLine2,
                            String area, String city, String state, String pincode,

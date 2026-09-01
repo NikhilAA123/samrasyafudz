@@ -75,7 +75,6 @@
   color: var(--color-ink);
 }
 
-/* Signature element: a small stamped weight tag, echoing a market price tag */
 .product-card-stamp {
   font-family: var(--font-mono);
   font-size: 11px;
@@ -117,7 +116,7 @@
   font-weight: 600;
   border: none;
   border-radius: 4px;
-  background: var(--color-brick);
+  background: var(--color-accent);
   color: #fff;
   cursor: pointer;
   transition: background 0.15s ease, opacity 0.15s ease;
@@ -132,19 +131,36 @@
   cursor: not-allowed;
 }
 
-.product-quantity {
+.product-item-quantity {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  margin-top: 12px;
+  border: 2px solid var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
 }
 
 .product-qty-btn {
-  width: 28px;
-  height: 28px;
+  flex: 0.5;
+  height: 36px;
   border: 1px solid var(--color-border);
-  background: var(--color-bg);
+  background: var(--color-accent);
   border-radius: 4px;
   font-size: 16px;
   line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
 }
-.product-qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.product-qty-btn:hover:not(:disabled) {
+  background: var(--color-border);
+}
+
+.product-item-quantity span {
+  flex: 1;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
