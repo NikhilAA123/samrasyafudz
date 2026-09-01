@@ -14,8 +14,9 @@ export default function ProductDetail() {
   const [error, setError] = useState<string | null>(null);
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedMessage, setAddedMessage] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState<number>(0);
 
-  const { addItem } = useCart();
+  const { addItem, updateQuantity } = useCart();
   const { user, openLogin } = useAuth();
 
   useEffect(() => {
@@ -51,6 +52,7 @@ export default function ProductDetail() {
     const variant = product?.variants?.find((v) => v.id === variantId) ?? null;
     setSelectedVariant(variant);
     setAddedMessage(null);
+    setQuantity(0);
   }
 
   async function handleAddToCart() {
@@ -65,11 +67,24 @@ export default function ProductDetail() {
     setAddedMessage(null);
     try {
       await addItem(product!.id, selectedVariant.id, 1);
+      setQuantity(1);
       setAddedMessage("Added to cart.");
     } catch (err: any) {
       setError(err?.response?.data?.message || "Could not add to cart. Please try again.");
     } finally {
       setAddingToCart(false);
+    }
+  }
+
+  async function handleQuantityChange(variantId: number, quantity: number) {
+    if (quantity < 1) return;
+    setError(null);
+    setAddedMessage(null);
+    try {
+      await updateQuantity(product!.id, variantId, quantity);
+      setQuantity(quantity);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Could not update quantity.");
     }
   }
 
@@ -126,14 +141,34 @@ export default function ProductDetail() {
           {error && <p className="error-text">{error}</p>}
           {addedMessage && <p className="product-detail-added">{addedMessage}</p>}
 
-          <button
-            className="btn-primary"
-            disabled={outOfStock || !hasVariants || addingToCart}
-            onClick={handleAddToCart}
-            style={{ marginTop: 20 }}
-          >
-            {outOfStock ? "Sold out" : addingToCart ? "Adding…" : "Add to cart"}
-          </button>
+          {quantity === 0 ? (
+            <button
+              className="btn-primary"
+              disabled={outOfStock || !hasVariants || addingToCart}
+              onClick={handleAddToCart}
+              style={{ marginTop: 20 }}
+            >
+              {outOfStock ? "Sold out" : addingToCart ? "Adding…" : "Add to cart"}
+            </button>
+          ) : (
+            <div className="product-detail-quantity" style={{ marginTop: 20 }}>
+              <button
+                className="product-qty-btn"
+                onClick={() => handleQuantityChange(selectedVariant?.id ?? 0, quantity - 1)}
+                disabled={quantity <= 1}
+              >
+                −
+              </button>
+              <span>{quantity}</span>
+              <button
+                className="product-qty-btn"
+                onClick={() => handleQuantityChange(selectedVariant?.id ?? 0, quantity + 1)}
+                disabled={quantity >= (selectedVariant?.stockQuantity ?? 0)}
+              >
+                +
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ export default function ProductCard({ product }: { product: Product }) {
     setSelectedVariant(variant);
     setAdded(false);
     setError(null);
+    setQuantity(0);
   }
 
   const outOfStock = selectedVariant ? selectedVariant.stockQuantity <= 0 : true;
@@ -51,12 +52,12 @@ export default function ProductCard({ product }: { product: Product }) {
     }
   }
 
-    async function handleQuantityChange(productId: number, variantId:number ,quantity: number) {
+  async function handleQuantityChange(productId: number, variantId: number, quantity: number) {
     if (quantity < 1) return;
     setError(null);
     try {
-      await updateQuantity(productId,variantId, quantity);
-      setQuantity(prev => prev + 1)
+      await updateQuantity(productId, variantId, quantity);
+      setQuantity(quantity);
     } catch (err: any) {
       setError(err?.response?.data?.message || "Could not update quantity.");
     }
@@ -110,7 +111,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </button>
         :
 
-        <div className="product-item-quantity">
+        <div className="product-quantity">
               <button
                 className="product-qty-btn"
                 onClick={() => handleQuantityChange(product.id,selectedVariant?.id || 0, quantity - 1)}
@@ -122,6 +123,7 @@ export default function ProductCard({ product }: { product: Product }) {
               <button
                 className="product-qty-btn"
                 onClick={() => handleQuantityChange(product.id,selectedVariant?.id || 0, quantity + 1)}
+                disabled={quantity >= (selectedVariant?.stockQuantity ?? 0)}
               >
                 +
               </button>
