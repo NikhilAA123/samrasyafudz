@@ -22,6 +22,9 @@ export default function CategoryFilter({ categories, selected, onSelect }: Props
           className={`category-pill ${selected === c.id ? "active" : ""}`}
           onClick={() => onSelect(c.id)}
         >
+          {c.imageUrl && (
+            <img className="category-pill-image" src={c.imageUrl} alt="" />
+          )}
           {c.name}
         </button>
       ))}
