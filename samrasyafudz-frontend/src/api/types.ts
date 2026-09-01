@@ -3,6 +3,7 @@ export interface Category {
   name: string;
   description: string | null;
   active: boolean;
+  imageUrl: string | null;
 }
 
 export interface Product {

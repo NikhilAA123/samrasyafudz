@@ -7,16 +7,18 @@ public class CategoryResponse {
     private String slug;
     private String description;
     private Boolean active;
+    private String imageUrl;
 
     public CategoryResponse() {
     }
 
-    public CategoryResponse(Long id, String name, String slug, String description, Boolean active) {
+    public CategoryResponse(Long id, String name, String slug, String description, Boolean active, String imageUrl) {
         this.id = id;
         this.name = name;
         this.slug = slug;
         this.description = description;
         this.active = active;
+        this.imageUrl = imageUrl;
     }
 
     public CategoryResponse(Long id, String name) {
@@ -39,4 +41,7 @@ public class CategoryResponse {
 
     public Boolean getActive() { return active; }
     public void setActive(Boolean active) { this.active = active; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 }

@@ -23,14 +23,24 @@ public class CategoryService {
 
         return new CategoryResponse(
                 category.getId(),
-                category.getName()
+                category.getName(),
+                null,
+                null,
+                null,
+                category.getImageUrl()
         );
     }
 
     public List<CategoryResponse> findAll() {
         return categoryRepository.findAll().stream()
-                .map(cat -> new CategoryResponse(cat.getId(), cat.getName()))
-                .collect(java.util.stream.Collectors.toList());
+            .map(cat -> new CategoryResponse(
+                    cat.getId(),
+                    cat.getName(),
+                    null,
+                    null,
+                    null,
+                    cat.getImageUrl()))
+            .collect(java.util.stream.Collectors.toList());
     }
 
     public void updateImageUrl(Long categoryId, String imageUrl) {
