@@ -52,11 +52,14 @@ export default function ProductCard({ product }: { product: Product }) {
     }
   }
 
-  async function handleQuantityChange(productId: number, variantId: number, quantity: number) {
-    if (quantity < 1) return;
+    async function handleQuantityChange(e: React.MouseEvent<HTMLButtonElement>,productId: number, variantId:number ,quantity: number) {
+        e.preventDefault();
+    e.stopPropagation();
+
+    if (quantity < 0) return;
     setError(null);
     try {
-      await updateQuantity(productId, variantId, quantity);
+      await updateQuantity(productId,variantId, quantity);
       setQuantity(quantity);
     } catch (err: any) {
       setError(err?.response?.data?.message || "Could not update quantity.");
@@ -102,28 +105,26 @@ export default function ProductCard({ product }: { product: Product }) {
 
         { quantity == 0 ? 
 
-                <button
+        <button
           className="product-card-add"
           disabled={outOfStock || !hasVariants || adding}
           onClick={handleAddToCart}
         >
-          {outOfStock ? "Sold out" : added ? "Added" : adding ? "Adding…" : "Add to cart"}
+          {outOfStock ? "Sold out" : adding ? "Adding…" : "Add to cart"}
         </button>
         :
 
-        <div className="product-quantity">
+        <div className="product-item-quantity">
               <button
                 className="product-qty-btn"
-                onClick={() => handleQuantityChange(product.id,selectedVariant?.id || 0, quantity - 1)}
-                disabled={quantity <= 1}
+                onClick={(e) => handleQuantityChange(e, product.id, selectedVariant?.id || 0, quantity - 1)}
               >
                 −
               </button>
               <span>{quantity}</span>
               <button
                 className="product-qty-btn"
-                onClick={() => handleQuantityChange(product.id,selectedVariant?.id || 0, quantity + 1)}
-                disabled={quantity >= (selectedVariant?.stockQuantity ?? 0)}
+                onClick={(e) => handleQuantityChange(e, product.id, selectedVariant?.id || 0, quantity + 1)}
               >
                 +
               </button>

@@ -77,7 +77,7 @@ export default function ProductDetail() {
   }
 
   async function handleQuantityChange(variantId: number, quantity: number) {
-    if (quantity < 1) return;
+    if (quantity < 0) return;
     setError(null);
     setAddedMessage(null);
     try {
@@ -143,7 +143,7 @@ export default function ProductDetail() {
 
           {quantity === 0 ? (
             <button
-              className="btn-primary"
+              className="product-detail-add"
               disabled={outOfStock || !hasVariants || addingToCart}
               onClick={handleAddToCart}
               style={{ marginTop: 20 }}
@@ -155,7 +155,6 @@ export default function ProductDetail() {
               <button
                 className="product-qty-btn"
                 onClick={() => handleQuantityChange(selectedVariant?.id ?? 0, quantity - 1)}
-                disabled={quantity <= 1}
               >
                 −
               </button>

@@ -1,4 +1,4 @@
-val springCloudVersion = "2023.0.1"
+val springCloudVersion = "2024.0.3"
 
 
 configurations {

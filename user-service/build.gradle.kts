@@ -5,7 +5,8 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.5")
     runtimeOnly("org.postgresql:postgresql")
-    implementation("org.flywaydb:flyway-core:9.22.3")
+    implementation("org.flywaydb:flyway-core")
+    implementation("org.flywaydb:flyway-database-postgresql")
     implementation("com.google.cloud.sql:postgres-socket-factory:1.19.1")
     testImplementation("org.springframework.security:spring-security-test")
 }

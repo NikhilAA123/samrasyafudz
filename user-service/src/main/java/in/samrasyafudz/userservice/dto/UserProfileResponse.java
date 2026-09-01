@@ -4,12 +4,12 @@ import java.time.LocalDateTime;
 
 public class UserProfileResponse {
 
-    private Long id;
-    private String phone;
-    private String fullName;
-    private String email;
-    private String role;
-    private LocalDateTime createdAt;
+    private final Long id;
+    private final String phone;
+    private final String fullName;
+    private final String email;
+    private final String role;
+    private final LocalDateTime createdAt;
 
     public UserProfileResponse(Long id, String phone, String fullName, String email,
                                String role, LocalDateTime createdAt) {
