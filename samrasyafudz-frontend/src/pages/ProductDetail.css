@@ -73,3 +73,20 @@
   font-weight: 500;
   margin-top: 8px;
 }
+
+.product-detail-quantity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.product-detail-quantity .product-qty-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  border-radius: 4px;
+  font-size: 18px;
+  line-height: 1;
+}
+.product-detail-quantity .product-qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
