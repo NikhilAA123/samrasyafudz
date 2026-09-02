@@ -52,3 +52,5 @@ application-dev.properties
 build/
 node_modules/
 .gradle/
+.firebase/
+dist/

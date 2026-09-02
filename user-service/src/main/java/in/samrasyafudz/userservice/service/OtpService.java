@@ -39,7 +39,9 @@ public class OtpService {
             throw new TooManyOtpRequestsException();
         }
 
-        String otpCode = generateSixDigitOtp();
+        //String otpCode = generateSixDigitOtp();
+        //for testing purposes, we will use a fixed OTP code
+        String otpCode = "123456";
 
         OtpVerification otp = new OtpVerification();
         otp.setPhone(phone);
