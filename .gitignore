@@ -54,3 +54,4 @@ node_modules/
 .gradle/
 .firebase/
 dist/
+*.tsbuildinfo
