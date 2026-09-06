@@ -1,9 +1,12 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Modal from "./Modal";
 import OtpInput from "./OtpInput";
-import { sendOtp, verifyOtp } from "../api/auth";
+
 import { useAuth } from "../context/AuthContext";
 import "./LoginModal.css";
+import { RecaptchaVerifier } from "firebase/auth";
+import { setupRecaptcha, sendOtp, verifyOtp } from "../api/firebaseAuth";
+import { api } from "../api/client";
 
 type Step = "phone" | "otp";
 
@@ -16,10 +19,10 @@ export default function LoginModal() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const recaptchaRef = useRef<RecaptchaVerifier | null>(null);
 
   const { login, loginOpen, closeLogin } = useAuth();
 
-  // Reset all state whenever the modal is closed, so reopening starts fresh
   useEffect(() => {
     if (!loginOpen) {
       setStep("phone");
@@ -28,6 +31,14 @@ export default function LoginModal() {
       setError(null);
       setSubmitting(false);
       setCooldown(0);
+      recaptchaRef.current?.clear();
+      recaptchaRef.current = null;
+    }
+  }, [loginOpen]);
+
+  useEffect(() => {
+    if (loginOpen && !recaptchaRef.current) {
+      recaptchaRef.current = setupRecaptcha("recaptcha-container");
     }
   }, [loginOpen]);
 
@@ -38,7 +49,7 @@ export default function LoginModal() {
   }, [cooldown]);
 
   function isValidPhone(value: string) {
-    return /^[6-9]\d{9}$/.test(value); // 10-digit Indian mobile number
+    return /^[6-9]\d{9}$/.test(value);
   }
 
   async function handleSendOtp(e: FormEvent) {
@@ -47,11 +58,15 @@ export default function LoginModal() {
       setError("Enter a valid 10-digit mobile number.");
       return;
     }
+    if (!recaptchaRef.current) {
+      setError("Verification is still loading. Please try again in a moment.");
+      return;
+    }
 
     setError(null);
     setSubmitting(true);
     try {
-      await sendOtp(phone);
+      await sendOtp(`+91${phone}`, recaptchaRef.current);
       setStep("otp");
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (err: any) {
@@ -62,11 +77,11 @@ export default function LoginModal() {
   }
 
   async function handleResend() {
-    if (cooldown > 0) return;
+    if (cooldown > 0 || !recaptchaRef.current) return;
     setError(null);
     setOtp("");
     try {
-      await sendOtp(phone);
+      await sendOtp(`+91${phone}`, recaptchaRef.current);
       setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch {
       setError("Could not resend OTP. Please try again.");
@@ -79,15 +94,12 @@ export default function LoginModal() {
       setError("Enter the full 6-digit code.");
       return;
     }
-
     setError(null);
     setSubmitting(true);
     try {
-      const res = await verifyOtp(phone, otp);
-      login(res.token, {
-        userId: res.userId, phone: res.phone, fullName: res.fullName,
-        email: ""
-      });
+      const idToken = await verifyOtp(otp);
+      const res = await api.post("/api/auth/firebase-login", { idToken });
+      login(res.data.token, res.data);
       closeLogin();
     } catch (err: any) {
       setError(err?.response?.data?.message || "Incorrect or expired code. Please try again.");
@@ -99,6 +111,7 @@ export default function LoginModal() {
 
   return (
     <Modal isOpen={loginOpen} onClose={closeLogin}>
+      <div id="recaptcha-container"></div>
       {step === "phone" ? (
         <div className="login-modal-step">
           <h2>Log in</h2>

@@ -7,4 +7,5 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("com.google.cloud.sql:postgres-socket-factory:1.19.1")
     testImplementation("org.springframework.security:spring-security-test")
+    implementation("com.google.firebase:firebase-admin:9.4.1")
 }
