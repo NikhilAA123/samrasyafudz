@@ -85,6 +85,13 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderResponse getOrderById(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(OrderNotFoundException::new);
+        return toResponse(order);
+    }
+
+    @Transactional
     public OrderResponse updateStatus(Long orderId, OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(OrderNotFoundException::new);

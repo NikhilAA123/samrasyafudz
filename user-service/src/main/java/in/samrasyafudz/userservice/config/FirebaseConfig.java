@@ -7,20 +7,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 @Configuration
 public class FirebaseConfig {
 
-    @Value("${firebase.credentials-path}")
-    private String credentialsPath;
+    @Value("${firebase.credentials.json}")
+    private String credentialsJson;
 
     @Bean
     public FirebaseApp firebaseApp() throws IOException {
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(
-                        new FileInputStream(credentialsPath)))
+                        new ByteArrayInputStream(credentialsJson.getBytes())))
                 .build();
         return FirebaseApp.getApps().isEmpty() ? FirebaseApp.initializeApp(options) : FirebaseApp.getInstance();
     }

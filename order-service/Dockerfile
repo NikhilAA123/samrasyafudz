@@ -3,16 +3,15 @@ FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /workspace
 
-# Copy Gradle wrapper + build scripts first (better layer caching)
 COPY gradlew gradlew.bat ./
 COPY gradle ./gradle
-COPY build.gradle.kts settings.gradle.kts ./
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 COPY common-security ./common-security
 
-# Copy the service source
+RUN sed -i 's#distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.14-bin.zip#' gradle/wrapper/gradle-wrapper.properties
+
 COPY order-service ./order-service
 
-# Build only this module's bootJar (resolves the common-security dependency too)
 RUN ./gradlew :order-service:bootJar --no-daemon
 
 # ---------- Runtime stage ----------

@@ -21,4 +21,9 @@ public class AdminOrderController {
                                       @Valid @RequestBody UpdateOrderStatusRequest request) {
         return orderService.updateStatus(orderId, request.getStatus());
     }
+
+    @GetMapping("/{orderId}")
+    public OrderResponse getOrder(@PathVariable Long orderId) {
+        return orderService.getOrderById(orderId);
+    }
 }

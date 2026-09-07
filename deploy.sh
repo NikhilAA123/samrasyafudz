@@ -35,9 +35,6 @@ ARTIFACT_REGISTRY="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}"
 FRONTEND_DIR="samrasyafudz-frontend"
 VITE_GOOGLE_MAPS_API_KEY="${VITE_GOOGLE_MAPS_API_KEY:-}"
 
-# Shared across all backend services (must be identical everywhere)
-JWT_SECRET="${JWT_SECRET:-}"
-
 # Existing secret names inside Secret Manager (create these yourself)
 SECRET_JWT="jwt-secret"
 SECRET_DB_PASSWORD="db-password"
@@ -88,7 +85,6 @@ preflight() {
         fi
         ok "secret $secret present"
     done
-    [[ -n "$JWT_SECRET" ]] && ok "JWT_SECRET env override will be used"
     ok "preflight passed"
 }
 
@@ -97,7 +93,6 @@ image_url() { # $1 = gradle module dir name (e.g. user-service)
     echo "${ARTIFACT_REGISTRY}/${SERVICES[$1]}"
 }
 
-# --------------------------------------------------------------- build push --
 # $1 = module dir  (e.g. user-service)
 build_and_push() {
     local svc="$1"
@@ -116,10 +111,9 @@ secrets_flags() {
     local svc="$1"
     local flags=( )
     if [[ -n "$(db_name_for "$svc")" ]]; then
-        flags+=( "SPRING_DATASOURCE_PASSWORD=projects/${PROJECT_ID}/secrets/${SECRET_DB_PASSWORD}:latest" )
+        flags+=( "SPRING_DATASOURCE_PASSWORD=${SECRET_DB_PASSWORD}:latest" )
     fi
-    # Uncomment to source the JWT secret from Secret Manager instead of the JWT_SECRET env var:
-    # flags+=( "JWT_SECRET=projects/${PROJECT_ID}/secrets/${SECRET_JWT}:latest" )
+    flags+=( "JWT_SECRET=${SECRET_JWT}:latest" )
     [[ "${#flags[@]}" -gt 0 ]] && printf -- '--set-secrets=%s ' "$(IFS=,; echo "${flags[*]}")"
 }
 
@@ -133,7 +127,7 @@ declare -A SERVICE_URLS=()
 db_name_for() {
     case "$1" in
         user-service)    echo "usersdb"    ;;
-        product-service) echo "productdb"  ;;
+        product-service) echo "productsdb"  ;;
         order-service)   echo "ordersdb"   ;;
         *)               echo ""           ;;
     esac
@@ -145,7 +139,7 @@ deploy_service() {
     info "Deploying $svc to Cloud Run"
 
     local envs=()
-    envs+=( "SPRING_PROFILES_ACTIVE=cloud" )
+    envs+=( "SPRING_PROFILES_ACTIVE=dev" )
 
     # All DB-backed services get the Cloud SQL connection string + secrets.
     # The socket factory connects without a dedicated host/port; the instance is
@@ -154,11 +148,6 @@ deploy_service() {
     if [[ -n "$db" ]]; then
         envs+=( "SPRING_DATASOURCE_USERNAME=${DB_USER}" )
         envs+=( "SPRING_DATASOURCE_URL=jdbc:postgresql:///${db}?cloudSqlInstance=${CLOUD_SQL_INSTANCE}&socketFactory=com.google.cloud.sql.postgres.SocketFactory" )
-    fi
-
-    # JWT secret for every service that validates tokens.
-    if [[ -n "$JWT_SECRET" ]]; then
-        envs+=( "JWT_SECRET=${JWT_SECRET}" )
     fi
 
     # Service-to-service URLs (only services that call others need these).

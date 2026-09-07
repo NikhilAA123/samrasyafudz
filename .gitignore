@@ -56,3 +56,5 @@ node_modules/
 dist/
 *.tsbuildinfo
 keys/
+.idea/
+setenv.sh

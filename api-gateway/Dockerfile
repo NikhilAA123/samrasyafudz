@@ -3,15 +3,14 @@ FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /workspace
 
-# Copy Gradle wrapper + build scripts first (better layer caching)
 COPY gradlew gradlew.bat ./
 COPY gradle ./gradle
-COPY build.gradle.kts settings.gradle.kts ./
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
 
-# Copy the service source
+RUN sed -i 's#distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.14-bin.zip#' gradle/wrapper/gradle-wrapper.properties
+
 COPY api-gateway ./api-gateway
 
-# Build only this module's bootJar
 RUN ./gradlew :api-gateway:bootJar --no-daemon
 
 # ---------- Runtime stage ----------
