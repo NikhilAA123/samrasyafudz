@@ -29,15 +29,25 @@ REGION="${REGION:-asia-south1}"                                # Cloud Run regio
 AR_REPO="${AR_REPO:-samrasya-services}"                        # Artifact Registry repo name
 CLOUD_SQL_INSTANCE="${CLOUD_SQL_INSTANCE:-}"                   # full path or name e.g. project:region:instance
 DB_USER="${DB_USER:-postgres}"
+GCS_BUCKET_NAME="${GCS_BUCKET_NAME:-samrasya-products}"        # GCS bucket for product images (product-service)
+CORS_ALLOWED_ORIGINS="${CORS_ALLOWED_ORIGINS:-http://localhost:5173}"  # gateway CORS origins (comma-separated)
 ARTIFACT_REGISTRY="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}"
 
-# Firestore/Google Maps keys for the frontend (baked at build time)
+# Firebase web-app config + Google Maps key for the frontend (baked at build time).
+# These are public browser keys (safe to pass via setenv.sh).
 FRONTEND_DIR="samrasyafudz-frontend"
 VITE_GOOGLE_MAPS_API_KEY="${VITE_GOOGLE_MAPS_API_KEY:-}"
+VITE_FIREBASE_API_KEY="${VITE_FIREBASE_API_KEY:-}"
+VITE_FIREBASE_AUTH_DOMAIN="${VITE_FIREBASE_AUTH_DOMAIN:-}"
+VITE_FIREBASE_PROJECT_ID="${VITE_FIREBASE_PROJECT_ID:-}"
+VITE_FIREBASE_STORAGE_BUCKET="${VITE_FIREBASE_STORAGE_BUCKET:-}"
+VITE_FIREBASE_MESSAGING_SENDER_ID="${VITE_FIREBASE_MESSAGING_SENDER_ID:-}"
+VITE_FIREBASE_APP_ID="${VITE_FIREBASE_APP_ID:-}"
 
 # Existing secret names inside Secret Manager (create these yourself)
 SECRET_JWT="jwt-secret"
 SECRET_DB_PASSWORD="db-password"
+SECRET_FIREBASE_CREDENTIALS="firebase-credentials"
 
 # Service -> deployed name on Cloud Run
 declare -A SERVICES=(
@@ -72,19 +82,27 @@ preflight() {
     [[ -n "$PROJECT_ID" ]] || die "PROJECT_ID is not set. Export it or edit deploy.sh"
     command -v gcloud >/dev/null || die "gcloud CLI not found. Install it and re-run."
     command -v firebase >/dev/null || die "firebase CLI not found. Install it and re-run."
-    command -v docker >/dev/null || die "docker not found. Install it and re-run."
+    ok "images build via Cloud Build (no local Docker required)"
     gcloud config get-value project 2>/dev/null | grep -q "$PROJECT_ID" \
         || die "gcloud is not on project $PROJECT_ID. Run: gcloud config set project $PROJECT_ID"
     ok "gcloud on project $PROJECT_ID"
 
     # Fail loudly & early if required secrets aren't in Secret Manager,
     # rather than deploying and only failing inside a running container.
-    for secret in "$SECRET_JWT" "$SECRET_DB_PASSWORD"; do
+    for secret in "$SECRET_JWT" "$SECRET_DB_PASSWORD" "$SECRET_FIREBASE_CREDENTIALS"; do
         if ! gcloud secrets describe "$secret" --project="$PROJECT_ID" >/dev/null 2>&1; then
             die "Secret '$secret' missing from Secret Manager. Create it before deploying."
         fi
         ok "secret $secret present"
     done
+
+    # The frontend bakes the Firebase web config at build time. A deploy with
+    # missing keys produces a broken OTP login, so fail before building.
+    if [[ -z "$VITE_FIREBASE_API_KEY" || -z "$VITE_FIREBASE_PROJECT_ID" ]]; then
+        die "VITE_FIREBASE_* env vars are not set. Export them (see setenv.sh / .env.example) before deploying."
+    fi
+    [[ -n "$VITE_GOOGLE_MAPS_API_KEY" ]] || ok "VITE_GOOGLE_MAPS_API_KEY is not set (maps will not work)"
+    ok "frontend Firebase config present"
     ok "preflight passed"
 }
 
@@ -97,16 +115,23 @@ image_url() { # $1 = gradle module dir name (e.g. user-service)
 build_and_push() {
     local svc="$1"
     local img; img="$(image_url "$svc")"
-    info "Building + pushing $svc"
-    docker build -t "$img:latest" -f "$svc/Dockerfile" .
-    docker push "$img:latest"
+    info "Building + pushing $svc via Cloud Build"
+    gcloud builds submit \
+        --project "$PROJECT_ID" \
+        --config cloudbuild.yaml \
+        --substitutions "_IMG=${img},_SRVC=${svc}" \
+        --timeout=1800 \
+        .
+    # The gcloud bash wrapper may not propagate exit codes here, so verify the image really exists.
+    if ! gcloud artifacts docker images describe "$img:latest" >/dev/null 2>&1; then
+        return 1
+    fi
     ok "$svc image pushed: $img:latest"
 }
 
 # Shows the --set-secrets flags for one service (maps Spring props to Secret Manager).
 # DB-backed services pull SPRING_DATASOURCE_PASSWORD from Secret Manager.
-# JWT_SECRET is passed as a plain env var so it can be overridden locally, but can
-# optionally be sourced from Secret Manager too by uncommenting the line below.
+# JWT_SECRET and the Firebase admin credentials (user-service only) also come from Secret Manager.
 secrets_flags() {
     local svc="$1"
     local flags=( )
@@ -114,6 +139,9 @@ secrets_flags() {
         flags+=( "SPRING_DATASOURCE_PASSWORD=${SECRET_DB_PASSWORD}:latest" )
     fi
     flags+=( "JWT_SECRET=${SECRET_JWT}:latest" )
+    if [[ "$svc" == "user-service" ]]; then
+        flags+=( "FIREBASE_CREDENTIALS_JSON=${SECRET_FIREBASE_CREDENTIALS}:latest" )
+    fi
     [[ "${#flags[@]}" -gt 0 ]] && printf -- '--set-secrets=%s ' "$(IFS=,; echo "${flags[*]}")"
 }
 
@@ -148,10 +176,19 @@ deploy_service() {
     if [[ -n "$db" ]]; then
         envs+=( "SPRING_DATASOURCE_USERNAME=${DB_USER}" )
         envs+=( "SPRING_DATASOURCE_URL=jdbc:postgresql:///${db}?cloudSqlInstance=${CLOUD_SQL_INSTANCE}&socketFactory=com.google.cloud.sql.postgres.SocketFactory" )
+        # Small Hikari pools: the db-f1-micro instance (~100 conns max) is easily
+        # exhausted by Cloud Run cold-starts, where each service used to grab up to
+        # 10 connections per instance at once ("remaining connection slots...").
+        envs+=( "SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE=2" )
+        envs+=( "SPRING_DATASOURCE_HIKARI_MINIMUMIDLE=1" )
+        envs+=( "SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT=30000" )
     fi
 
     # Service-to-service URLs (only services that call others need these).
     case "$svc" in
+        product-service)
+            envs+=( "GCS_BUCKET_NAME=${GCS_BUCKET_NAME}" )
+            ;;
         order-service)
             envs+=( "USER_SERVICE_URL=${SERVICE_URLS[user-service]}" )
             envs+=( "PRODUCT_SERVICE_URL=${SERVICE_URLS[product-service]}" )
@@ -160,6 +197,7 @@ deploy_service() {
             envs+=( "USER_SERVICE_URL=${SERVICE_URLS[user-service]}" )
             envs+=( "PRODUCT_SERVICE_URL=${SERVICE_URLS[product-service]}" )
             envs+=( "ORDER_SERVICE_URL=${SERVICE_URLS[order-service]}" )
+            envs+=( "CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}" )
             ;;
     esac
 
@@ -183,10 +221,27 @@ deploy_service() {
         --quiet
 
     # Capture the URL programmatically so the next service can consume it.
-    local url
+    local url created rev
     url=$(gcloud run services describe "$svc" \
         --region "$REGION" --project "$PROJECT_ID" \
         --format='value(status.url)')
+    created=$(gcloud run services describe "$svc" \
+        --region "$REGION" --project "$PROJECT_ID" \
+        --format='value(status.latestCreatedRevisionName)')
+    # Wait until the NEWLY created revision (not some older one) is ready.
+    # latestReadyRevisionName lags while a cold start fails, so comparing the two
+    # is what actually catches a failed deploy.
+    rev=""
+    for _ in $(seq 1 30); do
+        rev=$(gcloud run services describe "$svc" \
+            --region "$REGION" --project "$PROJECT_ID" \
+            --format='value(status.latestReadyRevisionName)')
+        [[ "$rev" == "$created" ]] && break
+        sleep 10
+    done
+    if [[ -z "$rev" || "$rev" != "$created" ]]; then
+        return 1
+    fi
     SERVICE_URLS["$svc"]="$url"
     ok "$svc -> $url"
 }
@@ -206,9 +261,16 @@ grant_gateway_invoker() {
 # --------------------------------------------------------------- frontend --
 deploy_frontend() {
     info "Building frontend"
+    ( cd "$FRONTEND_DIR" && firebase use "$PROJECT_ID" 2>/dev/null || true )
     ( cd "$FRONTEND_DIR" && \
       VITE_GOOGLE_MAPS_API_KEY="$VITE_GOOGLE_MAPS_API_KEY" \
       VITE_API_URL="${SERVICE_URLS[api-gateway]}" \
+      VITE_FIREBASE_API_KEY="$VITE_FIREBASE_API_KEY" \
+      VITE_FIREBASE_AUTH_DOMAIN="$VITE_FIREBASE_AUTH_DOMAIN" \
+      VITE_FIREBASE_PROJECT_ID="$VITE_FIREBASE_PROJECT_ID" \
+      VITE_FIREBASE_STORAGE_BUCKET="$VITE_FIREBASE_STORAGE_BUCKET" \
+      VITE_FIREBASE_MESSAGING_SENDER_ID="$VITE_FIREBASE_MESSAGING_SENDER_ID" \
+      VITE_FIREBASE_APP_ID="$VITE_FIREBASE_APP_ID" \
       npm run build )
 
     info "Deploying frontend to Firebase Hosting"

@@ -11,7 +11,7 @@ RUN sed -i 's#distributionUrl=.*#distributionUrl=https\\://services.gradle.org/d
 
 COPY user-service ./user-service
 
-RUN ./gradlew :user-service:bootJar --no-daemon
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew && ./gradlew :user-service:bootJar --no-daemon
 
 FROM eclipse-temurin:17-jre
 

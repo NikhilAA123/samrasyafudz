@@ -1,30 +1,39 @@
-import {
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  type ConfirmationResult,
-} from "firebase/auth";
+import { signInWithPhoneNumber, RecaptchaVerifier, type ConfirmationResult } from "firebase/auth";
 import { auth } from "../firebase-config";
 
 let confirmationResult: ConfirmationResult | null = null;
+let recaptchaVerifier: RecaptchaVerifier | null = null;
 
-export function setupRecaptcha(containerId: string) {
-  return new RecaptchaVerifier(auth, containerId, { size: "invisible" });
+const RECAPTCHA_CONTAINER_ID = "recaptcha-container";
+
+function getRecaptchaVerifier(): RecaptchaVerifier {
+  if (recaptchaVerifier) {
+    try {
+      recaptchaVerifier.clear();
+    } catch {
+      // ignore if already cleared
+    }
+  }
+  recaptchaVerifier = new RecaptchaVerifier(auth, RECAPTCHA_CONTAINER_ID, {
+    size: "invisible",
+  });
+  return recaptchaVerifier;
 }
 
-export async function sendOtp(
-  phone: string,
-  recaptchaVerifier: RecaptchaVerifier,
-) {
-  await recaptchaVerifier.render();
-  confirmationResult = await signInWithPhoneNumber(
-    auth,
-    phone,
-    recaptchaVerifier,
-  );
+export async function sendOtp(phone: string) {
+  const verifier = getRecaptchaVerifier();
+  confirmationResult = await signInWithPhoneNumber(auth, phone, verifier);
 }
 
 export async function verifyOtp(code: string): Promise<string> {
   if (!confirmationResult) throw new Error("No OTP was requested");
   const result = await confirmationResult.confirm(code);
+  if (recaptchaVerifier) {
+    try {
+      recaptchaVerifier.clear();
+    } catch {
+      // ignore
+    }
+  }
   return result.user.getIdToken();
 }
