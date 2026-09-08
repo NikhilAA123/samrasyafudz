@@ -6,12 +6,13 @@ WORKDIR /workspace
 COPY gradlew gradlew.bat ./
 COPY gradle ./gradle
 COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY common-security ./common-security
 
 RUN sed -i 's#distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.14-bin.zip#' gradle/wrapper/gradle-wrapper.properties
 
 COPY api-gateway ./api-gateway
 
-RUN ./gradlew :api-gateway:bootJar --no-daemon
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew && ./gradlew :api-gateway:bootJar --no-daemon
 
 # ---------- Runtime stage ----------
 FROM eclipse-temurin:17-jre

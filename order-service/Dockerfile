@@ -12,7 +12,7 @@ RUN sed -i 's#distributionUrl=.*#distributionUrl=https\\://services.gradle.org/d
 
 COPY order-service ./order-service
 
-RUN ./gradlew :order-service:bootJar --no-daemon
+RUN sed -i 's/\r$//' gradlew && chmod +x gradlew && ./gradlew :order-service:bootJar --no-daemon
 
 # ---------- Runtime stage ----------
 FROM eclipse-temurin:17-jre
