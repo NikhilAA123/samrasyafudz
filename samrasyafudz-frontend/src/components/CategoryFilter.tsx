@@ -9,7 +9,13 @@ interface Props {
 
 export default function CategoryFilter({ categories, selected, onSelect}: Props) {
 
-  
+  categories.push({
+    id:null,
+    name:"All",
+    description:"All Categories",
+    imageUrl:null,
+    active:true
+  });
 
   return (
     <CategoryCarousel categories={categories} autoplayMs={3000} itemsPerSlide={5} onSelect={onSelect} selected={selected}/>

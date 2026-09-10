@@ -1,5 +1,5 @@
 export interface Category {
-  id: number;
+  id: number | null;
   name: string;
   description: string | null;
   active: boolean;
@@ -123,7 +123,12 @@ export interface OrderItem {
   subtotal: number;
 }
 
-export type OrderStatus = "PENDING" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+export type OrderStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "CANCELLED";
 
 export interface Order {
   id: number;
