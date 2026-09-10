@@ -2,6 +2,9 @@
   position: relative;
   width: 100%;
   user-select: none;
+  gap: 15px;
+  padding: 4px 4px 16px;
+  margin-bottom: 22px;
 }
 
 .carousel-empty {
@@ -113,13 +116,32 @@
   aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 50%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.category-tile:hover .category-tile-image {
+  border-color: var(--color-olive);
+  transform: translateY(-2px);
+}
+
+.category-tile.active .category-tile-image {
+  border-color: var(--color-olive);
+  box-shadow: 0 0 0 3px rgba(128, 128, 0, 0.2);
 }
 
 .category-tile-fallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eee;
   font-weight: 600;
   color: #666;
 }

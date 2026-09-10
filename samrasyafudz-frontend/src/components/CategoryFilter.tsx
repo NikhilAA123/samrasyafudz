@@ -1,6 +1,5 @@
 import type { Category } from "../api/types";
 import CategoryCarousel from "./CategoryCarousel";
-import "./CategoryFilter.css";
 
 interface Props {
   categories: Category[];
