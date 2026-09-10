@@ -17,7 +17,6 @@ export default function CategoryFilter({ categories, selected, onSelect }: Props
         onClick={() => onSelect(null)}
       >
         <span className="category-tile-image category-tile-all">All</span>
-        <span className="category-tile-name">All</span>
       </button>
 
       {categories.map((c) => (
@@ -40,7 +39,6 @@ export default function CategoryFilter({ categories, selected, onSelect }: Props
               {c.name.charAt(0)}
             </span>
           )}
-          <span className="category-tile-name">{c.name}</span>
         </button>
       ))}
     </div>

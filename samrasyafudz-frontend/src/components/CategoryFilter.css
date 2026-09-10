@@ -58,25 +58,6 @@
   box-shadow: 0 0 0 3px rgba(128, 128, 0, 0.2);
 }
 
-.category-tile-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-ink-soft);
-  text-align: center;
-  line-height: 1.2;
-  max-width: 82px;
-  transition: color 0.15s ease;
-}
-
-.category-tile:hover .category-tile-name {
-  color: var(--color-ink);
-}
-
-.category-tile.active .category-tile-name {
-  color: var(--color-ink);
-  font-weight: 600;
-}
-
 .category-tile-fallback {
   font-size: 26px;
   font-weight: 700;
