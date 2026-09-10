@@ -1,4 +1,5 @@
 import type { Category } from "../api/types";
+import CategoryCarousel from "./CategoryCarousel";
 import "./CategoryFilter.css";
 
 interface Props {
@@ -7,7 +8,16 @@ interface Props {
   onSelect: (id: number | null) => void;
 }
 
-export default function CategoryFilter({ categories, selected, onSelect }: Props) {
+export default function CategoryFilter({ categories, selected, onSelect}: Props) {
+
+  
+
+  return (
+    <CategoryCarousel categories={categories} autoplayMs={3000} itemsPerSlide={5} onSelect={onSelect} selected={selected}/>
+  )
+}
+
+/*export default function CategoryFilter({ categories, selected, onSelect }: Props) {
   return (
     <div className="category-carousel" role="list" aria-label="Filter by category">
       <button
@@ -45,4 +55,4 @@ export default function CategoryFilter({ categories, selected, onSelect }: Props
       ))}
     </div>
   );
-}
+}*/
