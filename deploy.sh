@@ -47,7 +47,7 @@ VITE_FIREBASE_APP_ID="${VITE_FIREBASE_APP_ID:-}"
 # Existing secret names inside Secret Manager (create these yourself)
 SECRET_JWT="jwt-secret"
 SECRET_DB_PASSWORD="db-password"
-SECRET_FIREBASE_CREDENTIALS="firebase-credentials"
+SECRET_FIREBASE_CREDENTIALS="firebase-service-acc-key"
 
 # Service -> deployed name on Cloud Run
 declare -A SERVICES=(
@@ -185,6 +185,7 @@ deploy_service() {
     fi
 
     # Service-to-service URLs (only services that call others need these).
+
     case "$svc" in
         product-service)
             envs+=( "GCS_BUCKET_NAME=${GCS_BUCKET_NAME}" )
@@ -201,8 +202,9 @@ deploy_service() {
             ;;
     esac
 
+
     # Cloud Run's --set-env-vars takes ONE comma-separated list.
-    local env_arg; env_arg=$(IFS=,; echo "${envs[*]}")
+    local env_arg; env_arg=$(IFS=@; echo "^@^${envs[*]}")
     local secflags; secflags="$(secrets_flags "$svc")"
 
     gcloud run deploy "$svc" \
