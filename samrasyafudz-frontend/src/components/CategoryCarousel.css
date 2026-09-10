@@ -28,6 +28,7 @@
 .carousel-slide {
   flex: 0 0 var(--slide-width, 25%);
   aspect-ratio: 1 / 1;
+  position: relative;
 }
 
 .carousel-slide img {
@@ -35,6 +36,23 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.category-tile-caption {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  bottom: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(38, 38, 38, 0.6);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  white-space: normal;
+  pointer-events: none;
 }
 
 .carousel-btn {

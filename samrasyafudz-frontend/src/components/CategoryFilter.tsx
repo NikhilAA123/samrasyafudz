@@ -50,7 +50,7 @@ export default function CategoryFilter({ categories, selected, onSelect}: Props)
               {c.name.charAt(0)}
             </span>
           )}
-          <span className="category-tile-name">{c.name}</span>
+          <span className="category-tile-caption">{c.name}</span>
         </button>
       ))}
     </div>

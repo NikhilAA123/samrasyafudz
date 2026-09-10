@@ -118,6 +118,7 @@ export default function CategoryCarousel({
                   {c.name.charAt(0)}
                 </span>
               )}
+              <span className="category-tile-caption">{c.name}</span>
             </button>
           ))}
         </div>
